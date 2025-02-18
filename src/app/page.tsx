@@ -31,8 +31,8 @@ export default function Home() {
       } else {
         setError('Invalid credentials');
       }
-    } catch (err) {
-      setError('Login failed. Please try again.');
+    } catch (error: any) {
+      setError(error.message || 'Login failed. Please try again.');
     }
   };
 
