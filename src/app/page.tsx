@@ -3,38 +3,38 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { signIn } from '@/lib/auth';
 import type { User } from '@/types/supabase';
 
 export default function Home() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');  // Changed from username
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
-      const { data, error: supabaseError } = await supabase
-        .from('users')
-        .select<'users', User>('*')
-        .eq('username', username)
-        .eq('password', password)
-        .single();
+      const { data, error: signInError } = await signIn(email, password);
 
-      if (supabaseError) {
-        throw new Error(supabaseError.message);
+      if (signInError) {
+        throw signInError;
       }
 
-      if (data) {
+      if (data.user) {
         router.push('/dashboard');
       } else {
         setError('Invalid credentials');
       }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Login failed. Please try again.');
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setError(error.message || 'Failed to login');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,13 +64,14 @@ export default function Home() {
 
           <form className="space-y-4" onSubmit={handleLogin}>
             <div>
-              <label className="block text-sm font-medium mb-1">Username</label>
+              <label className="block text-sm font-medium mb-1">Email</label>
               <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
-                placeholder="Enter your username"
+                placeholder="Enter your email"
+                required
               />
             </div>
             
@@ -82,14 +83,17 @@ export default function Home() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
                 placeholder="Enter your password"
+                required
+                minLength={6}
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              Sign In
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 

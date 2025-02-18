@@ -1,5 +1,6 @@
 import { BellIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import { UserCircleIcon } from '@heroicons/react/24/solid';  // Add this import
 
 export default function Header() {
   return (
@@ -13,13 +14,8 @@ export default function Header() {
         </button>
         <div className="flex items-center space-x-3">
           <span className="text-sm">John Doe</span>
-          <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
-            <Image
-              src="/avatar-placeholder.png"
-              alt="Profile"
-              width={32}
-              height={32}
-            />
+          <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+            <UserCircleIcon className="w-8 h-8 text-gray-400" />
           </div>
         </div>
       </div>

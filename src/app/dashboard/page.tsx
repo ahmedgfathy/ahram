@@ -1,10 +1,38 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Header from '@/components/dashboard/Header';
 import { ChartBarIcon, HomeIcon, UsersIcon } from '@heroicons/react/24/outline';
 
 export default function Dashboard() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error || !session) {
+          router.push('/');
+        }
+      } catch (error) {
+        console.error('Auth error:', error);
+        router.push('/');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
@@ -77,7 +105,7 @@ function StatsCard({ title, value, icon: Icon, trend }: { title: string; value: 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
-        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg icon-container">
           <Icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
         </div>
         <span className={`text-sm ${trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
