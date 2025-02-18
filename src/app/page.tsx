@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import type { User } from '@/types/supabase';
 
 export default function Home() {
   const router = useRouter();
@@ -18,20 +19,22 @@ export default function Home() {
     try {
       const { data, error: supabaseError } = await supabase
         .from('users')
-        .select()
+        .select<'users', User>('*')
         .eq('username', username)
         .eq('password', password)
         .single();
 
-      if (supabaseError) throw supabaseError;
+      if (supabaseError) {
+        throw new Error(supabaseError.message);
+      }
 
       if (data) {
         router.push('/dashboard');
       } else {
         setError('Invalid credentials');
       }
-    } catch (error: any) {
-      setError(error.message || 'Login failed. Please try again.');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Login failed. Please try again.');
     }
   };
 
