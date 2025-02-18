@@ -16,17 +16,16 @@ export default function Home() {
     setError('');
 
     try {
-      const { data, error } = await supabase
+      const { data, error: supabaseError } = await supabase
         .from('users')
         .select()
         .eq('username', username)
         .eq('password', password)
         .single();
 
-      if (error) throw error;
+      if (supabaseError) throw supabaseError;
 
       if (data) {
-        // Successful login
         router.push('/dashboard');
       } else {
         setError('Invalid credentials');
